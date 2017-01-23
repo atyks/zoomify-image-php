@@ -1,37 +1,36 @@
 <?php
-include_once "zoomifyhelper.php";
+    set_time_limit(0);
+    include_once "zoomifyhelper.php";
 
-// absolute system path to images dir
-$imagepath = "/full/system/path/to/zoomify-image-php/images/";
-$imageurl = "images/";
+    // absolute system path to images dir
+    $imagepath = "/full/system/path/to/zoomify-image-php/images/";
+    $imageurl = "images/";
 
-$zoomifyObject = new zoomify($imagepath);
+    $zoomifyObject = new zoomify($imagepath);
 
-// settings 
-$zoomifyObject->_debug = 0; //set to 1 to see output
-$zoomifyObject->_filegroup = "user"; // name of group to write files as
+    // settings
+    $zoomifyObject->_debug = 0; //set to 1 to see output
+    $zoomifyObject->_filegroup = "user"; // name of group to write files as
 
-//probably won't have to change these
-$zoomifyObject->_filemode = '664';
-$zoomifyObject->_dirmode = '2775';
+    //probably won't have to change these
+    $zoomifyObject->_filemode = '664';
+    $zoomifyObject->_dirmode = '2775';
 
 
-	if($_POST["action"] == "process") {
-		echo "<p>Processing all files in $imagepath ...</p>";
+    if ($_POST["action"] == "process") {
+        echo "<p>Processing all files in $imagepath ...</p>";
 
-		$zoomifyObject->processImages();
+        $zoomifyObject->processImages();
 
-		echo "<p>Finished processing all files in $imagepath.</p>";
-	}
+        echo "<p>Finished processing all files in $imagepath.</p>";
+    }
 ?>
 
 <h1>Zoomify Processor</h1>
 
 <form action="example.php" method="post">
-
 	<input type="hidden" value="process" name="action" />
 	<input type="submit" value=" Begin Processing of Images >> " />
-
 </form>
 
 <h1>Zoomify Inspector</h1>
@@ -40,6 +39,5 @@ $zoomifyObject->_dirmode = '2775';
 <hr>
 
 <?php
-
-$zoomifyObject->listZoomifiedImages($imageurl);
+    $zoomifyObject->listZoomifiedImages($imageurl);
 ?>

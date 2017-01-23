@@ -5,129 +5,131 @@ Class Name: zoomify
 
 Author: Justin Henry, http://greengaloshes.cc
 
-Purpose: This class contains methods to support the use of the ZoomifyFileProcessor 
-class.  The ZoomifyFileProcessor class is a port of the ZoomifyImage python script to a 
-PHP class.  The original python script was written by Adam Smith, and was ported to 
+Purpose: This class contains methods to support the use of the ZoomifyFileProcessor
+class.  The ZoomifyFileProcessor class is a port of the ZoomifyImage python script to a
+PHP class.  The original python script was written by Adam Smith, and was ported to
 PHP (in the form of ZoomifyFileProcessor) by Wes Wright.
 
-Both tools do the about same thing - that is, they convert images into a format 
-that can be used by the "zoomify" image viewer. 
-	
-This class provides an interface for performing "batch" conversions using the 
-ZoomifyFileProcessor class.  It also provides methods for inspecting resulting 
-processed images. 
-	
+Both tools do the about same thing - that is, they convert images into a format
+that can be used by the "zoomify" image viewer.
+
+This class provides an interface for performing "batch" conversions using the
+ZoomifyFileProcessor class.  It also provides methods for inspecting resulting
+processed images.
+
 ****************************************************************************************/
 
 require_once("ZoomifyFileProcessor.php");
 
 class zoomify
 {
+    public $_debug ;
+    public $_filemode ;
+    public $_dirmode ;
+    public $_filegroup ;
+    public $_imagepath ;
 
-	var $_debug ;
-	var $_filemode ;
-	var $_dirmode ;
-	var $_filegroup ;
+    //*****************************************************************************
+    // constructor
+    // initialize process, set class vars
+    public function zoomify($imagepath)
+    {
+        $this->_imagepath = $imagepath;
+    }
 
-	//*****************************************************************************
-	// constructor
-	// initialize process, set class vars
-	function zoomify ($imagepath) {
-	
-		define ("IMAGEPATH", $imagepath);
-		
-	}
-	
-	//*****************************************************************************
-	//takes path to a directory
-	//prints list of links to a zoomified image
-	function listZoomifiedImages($dir) {
-	    if ($dh = @opendir($dir)) {
-	        while (false !== ($filename = readdir($dh))) {
-	            if (($filename != ".") && ($filename != "..") && (is_dir($dir.$filename."/")))
-	                echo "<a href=\"viewer.php?file=" . $filename . "&path=" . $dir ."\">$filename</a><br>\n";
-	        }
+    //*****************************************************************************
+    //takes path to a directory
+    //prints list of links to a zoomified image
+    public function listZoomifiedImages($dir)
+    {
+        if ($dh = @opendir($dir)) {
+            while (false !== ($filename = readdir($dh))) {
+                if (($filename != ".") && ($filename != "..") && (is_dir($dir.$filename."/"))) {
+                    echo "<a href=\"viewer.php?file=" . $filename . "&path=" . $dir ."\">$filename</a><br>\n";
+                }
+            }
+        } else {
+            return false;
+        }
+    }
 
-	    } else return false;
+    //*****************************************************************************
+    //takes path to a directory
+    //returns an array containing each entry in the directory
+    public function getDirList($dir)
+    {
+        if ($dh = @opendir($dir)) {
+            while (false !== ($filename = readdir($dh))) {
+                if (($filename != ".") && ($filename != "..")) {
+                    $filelist[] = $filename;
+                }
+            }
 
-	}	
-			
-	//*****************************************************************************
-	//takes path to a directory
-	//returns an array containing each entry in the directory
-	function getDirList($dir) {
-	    if ($dh = @opendir($dir)) {
-	        while (false !== ($filename = readdir($dh))) {
-	            if (($filename != ".") && ($filename != ".."))
-	                $filelist[] = $filename;
-	        }
+            sort($filelist);
 
-	        sort($filelist);
-        
-	        return $filelist;
-	    } else return false;
+            return $filelist;
+        } else {
+            return false;
+        }
+    }
 
-	}
+    //*****************************************************************************
+    //takes path to a directory
+    //returns an array w/ every file in the directory that is not a dir
+    public function getImageList($dir)
+    {
+        $filelist = array();
+        if ($dh = @opendir($dir)) {
+            while (false !== ($filename = readdir($dh))) {
+                if (($filename != ".") && ($filename != "..") && (!is_dir($dir.$filename."/"))) {
+                    if(exif_imagetype($dir . "/" . $filename) != IMAGETYPE_JPEG) {
+                        continue;
+                    }
 
-	//*****************************************************************************
-	//takes path to a directory
-	//returns an array w/ every file in the directory that is not a dir
-	function getImageList($dir) {
-	    if ($dh = @opendir($dir)) {
-	        while (false !== ($filename = readdir($dh))) {
-	            if (($filename != ".") && ($filename != "..") && (!is_dir($dir.$filename."/")))
-	                $filelist[] = $filename;
-	        }
+                    $filelist[] = $filename;
+                }
+            }
 
-	        sort($filelist);
-        
-	        return $filelist;
-	    } else return false;
+            sort($filelist);
 
-	}
+            return $filelist;
+        } else {
+            return false;
+        }
+    }
 
-	//*****************************************************************************
-	// run the zoomify converter on the specified file.
-	// check to be sure the file hasn't been converted already
-	// set the perms appropriately
-	function zoomifyObject($filename, $path) {
-	
-		$converter = new ZoomifyFileProcessor();
-		$converter->_debug = $this->_debug;
-		$converter->_filemode = octdec($this->_filemode);
-		$converter->_dirmode = octdec($this->_dirmode);
-		$converter->_filegroup = $this->_filegroup;
-		
-		$trimmedFilename = $this->stripExtension($filename);
-	
-		if (!file_exists($path . $trimmedFilename)) {
-			$file_to_process = $path . $filename;
-			echo "Processing " . $file_to_process . "...<br />";
-			$converter->ZoomifyProcess($file_to_process);
-		} else {
-			echo "Skipping " . $path . $filename . "... (" . $path . $trimmedFilename . " exists)<br />";
-		}
-	
-	}
+    //*****************************************************************************
+    // run the zoomify converter on the specified file.
+    // check to be sure the file hasn't been converted already
+    // set the perms appropriately
+    public function zoomifyObject($filename, $path)
+    {
+        $converter = new ZoomifyFileProcessor();
+        $converter->_debug = $this->_debug;
+        $converter->_filemode = octdec($this->_filemode);
+        $converter->_dirmode = octdec($this->_dirmode);
+        $converter->_filegroup = $this->_filegroup;
 
-	//*****************************************************************************
-	// list the specified directory 
-	function processImages() {
-		$objects = $this->getImageList(IMAGEPATH);
+        $trimmedFilename = pathinfo($filename, PATHINFO_FILENAME);
 
-		foreach ($objects as $object) {
-			$this->zoomifyObject($object,IMAGEPATH);
-		}
-	}
+        if (!file_exists($path . $trimmedFilename)) {
+            $converter->ZoomifyProcess($path . $filename);
+        }
+    }
 
-	/***************************************************************************/
-	//strips the extension off of the filename, i.e. file.ext -> file
-	function stripExtension($filename, $ext=".jpg")
-	{
-	    $filename = explode(".",$filename);
-	    $file_ext = array_pop($filename);
-	    $filename = implode(".",$filename);
-	    return $filename; 
-	}
+    //*****************************************************************************
+    // list the specified directory
+    public function processImages()
+    {
+        $objects = $this->getImageList($this->_imagepath);
 
+        if($objects !== false) {
+            foreach ($objects as $object) {
+                $this->zoomifyObject($object, $this->_imagepath);
+            }
+        }
+        else {
+            return(false);
+        }
+    }
 }
