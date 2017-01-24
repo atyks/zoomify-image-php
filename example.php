@@ -3,7 +3,7 @@
     include_once "zoomifyhelper.php";
 
     // absolute system path to images dir
-    $imagepath = "/full/system/path/to/zoomify-image-php/images/";
+    $imagepath = dirname(__FILE__) . "/images/";
     $imageurl = "images/";
 
     $zoomifyObject = new zoomify($imagepath);
