@@ -81,11 +81,7 @@ class zoomify
         $filelist = array();
         if ($dh = @opendir($dir)) {
             while (false !== ($filename = readdir($dh))) {
-                if (($filename != ".") && ($filename != "..") && (!is_dir($dir.$filename."/"))) {
-                    if(exif_imagetype($dir . "/" . $filename) != IMAGETYPE_JPEG) {
-                        continue;
-                    }
-
+                if (($filename != ".") && ($filename != "..") && ! preg_match("/^\./", $filename) && (!is_dir($dir.$filename."/"))) {
                     $filelist[] = $filename;
                 }
             }
@@ -113,7 +109,9 @@ class zoomify
         $trimmedFilename = pathinfo($filename, PATHINFO_FILENAME);
 
         if (!file_exists($path . $trimmedFilename)) {
-            $converter->ZoomifyProcess($path . $filename);
+            if ($converter->isSupportImageType($path . $filename)) {
+                $converter->ZoomifyProcess($path . $filename);
+            }
         }
     }
 
@@ -123,12 +121,11 @@ class zoomify
     {
         $objects = $this->getImageList($this->_imagepath);
 
-        if($objects !== false) {
+        if ($objects !== false) {
             foreach ($objects as $object) {
                 $this->zoomifyObject($object, $this->_imagepath);
             }
-        }
-        else {
+        } else {
             return(false);
         }
     }

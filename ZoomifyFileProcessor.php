@@ -100,12 +100,63 @@ class ZoomifyFileProcessor
     }
 
 
-    public function openImage()
+    public function openImage($file)
     {
-        # """ load the image data """
-        $this->debugMessage("openImage ". $this->_v_imageFilename);
+        $ret = false;
 
-        return imagecreatefromjpeg($this->_v_imageFilename);
+        # """ load the image data """
+        $this->debugMessage("openImage ". $file);
+
+        switch (exif_imagetype($file)) {
+            case IMAGETYPE_JPEG:
+                $ret = imagecreatefromjpeg($file);
+                break;
+
+            case IMAGETYPE_PNG:
+                $ret = imagecreatefrompng($file);
+                break;
+
+            case IMAGETYPE_GIF:
+                $ret = imagecreatefromgif($file);
+                break;
+
+            default:
+                trigger_error(sprintf('Unsupported image format %s', $file), E_USER_WARNING);
+                break;
+        }
+
+        return $ret;
+    }
+
+    public function writeImage($image, $file, $quality=100)
+    {
+        $ret = "";
+
+        # """ load the image data """
+        $this->debugMessage("writeImage ". $file);
+
+        return imagejpeg($image, $file, $quality);
+    }
+
+    public function isSupportImageType($file)
+    {
+        $ret = false;
+
+        switch (exif_imagetype($file)) {
+            case IMAGETYPE_JPEG:
+            case IMAGETYPE_PNG:
+            case IMAGETYPE_GIF:
+                $ret = true;
+                break;
+
+            default:
+                $ret = false;
+                break;
+        }
+
+        $this->debugMessage("isSupportImageType ". $ret);
+
+        return($ret);
     }
 
     public function getTileFileName($scaleNumber, $columnNumber, $rowNumber)
@@ -226,7 +277,7 @@ class ZoomifyFileProcessor
 
             $this->debugMessage("create this row from previous tier's rows tier=$tier row=$row firstRowFile=$firstRowFile");
 
-            $this->debugMessage( "imageRow tierWidth=$tierWidth tierHeight= $this->tileSize");
+            $this->debugMessage("imageRow tierWidth=$tierWidth tierHeight= $this->tileSize");
 
             $firstRowWidth = 0;
             $firstRowHeight = 0;
@@ -332,7 +383,7 @@ class ZoomifyFileProcessor
                 $rowFileName = $root.$tier."-".$row.$ext;
 
                 $this->touch("file", $rowFileName);
-                imagejpeg($tempImage, $rowFileName);
+                $this->writeImage($tempImage, $rowFileName);
                 imagedestroy($tempImage);
             }
 
@@ -364,7 +415,7 @@ class ZoomifyFileProcessor
         list($ul_y, $lr_y) = array(0,0);
         list($root, $ext) = explode(".", $this->_v_imageFilename);
 
-        if(exif_imagetype($this->_v_imageFilename) != IMAGETYPE_JPEG) {
+        if (! $this->isSupportImageType($this->_v_imageFilename)) {
             $this->debugMessage("invalid image type");
 
             return(false);
@@ -377,7 +428,7 @@ class ZoomifyFileProcessor
         $ext = ".jpg";
         $this->debugMessage("processImage root=$root ext=$ext");
 
-        $image = $this->openImage();
+        $image = $this->openImage($this->_v_imageFilename);
         while ($row * $this->tileSize < $this->originalHeight) {
             $ul_y = $row * $this->tileSize;
 
@@ -394,7 +445,7 @@ class ZoomifyFileProcessor
 
             $this->touch("file", $saveFilename);
 
-            imagejpeg($imageRow, $saveFilename, 100);
+            $this->writeImage($imageRow, $saveFilename, 100);
             imagedestroy($imageRow);
             $this->processRowImage($tier, $row);
             $row++;
@@ -522,7 +573,7 @@ class ZoomifyFileProcessor
 
         $this->touch("file", $tile_file);
 
-        imagejpeg($image, $tile_file, $this->qualitySetting);
+        $this->writeImage($image, $tile_file, $this->qualitySetting);
 
         $this->debugMessage("Saving to tile_file $tile_file");
     }
@@ -533,24 +584,28 @@ class ZoomifyFileProcessor
 
         # """ the method the client calls to generate zoomify metadata """
         $this->_v_imageFilename = $image_name;
+
         $this->createDataContainer($image_name);
         $this->getImageMetadata();
         $this->processImage();
         $this->saveXMLOutput();
     }
 
-    public function touch($type, $path) {
-        @mkdir(dirname($path), $this->_dirmode, true);
-
-        if($type == "file") {
+    public function touch($type, $path)
+    {
+        if ($type == "file") {
+            @mkdir(dirname($path), $this->_dirmode, true);
             @touch($path);
+        } else {
+            @mkdir($path, $this->_dirmode, true);
         }
 
         @chmod($path, $this->_dirmode);
         @chgrp($path, $this->_filegroup);
     }
 
-    public function debugMessage($msg) {
+    public function debugMessage($msg)
+    {
         if (! $this->_debug) {
             return;
         }
@@ -561,5 +616,4 @@ class ZoomifyFileProcessor
             print $msg . "<br>\n";
         }
     }
-
 }
