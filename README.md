@@ -9,7 +9,7 @@ $ git clone git@github.com:atyks/zoomify-image-php.git
 
 put source image file to ./image
 
-$ php example.php
+$ php example_cli.php
 
 generate Zoomify file to ./image
 
