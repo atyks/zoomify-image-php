@@ -320,7 +320,7 @@ class ZoomifyFileProcessor
             $rowHeight = $firstRowHeight+$secondRowHeight;
             $tileHeight = $this->tileSize;
             if ($rowHeight < $tileHeight) {
-                $this->debugMessage("line 241 calling crop rowHeight=$rowHeight tileHeight=$tileHeight");
+                $this->debugMessage("calling crop rowHeight=$rowHeight tileHeight=$tileHeight");
                 $imageRow = $this->imageCrop($imageRow, 0, 0, $tierWidth, $rowHeight);
             }
         }
@@ -352,7 +352,7 @@ class ZoomifyFileProcessor
                 }
 
                 #tierLabel = len($this->_v_scaleInfo) - tier
-                $this->debugMessage("line 248 calling crop");
+                $this->debugMessage("calling crop");
 
                 $this->saveTile($this->imageCrop($imageRow, $ul_x, $ul_y, $lr_x, $lr_y), $tier, $column, $row);
                 $this->numberOfTiles++;
@@ -609,10 +609,12 @@ class ZoomifyFileProcessor
             return;
         }
 
+        $trace = debug_backtrace();
+
         if (php_sapi_name() == 'cli') {
-            print $msg . "\n";
+            printf("Line %04d: %s\n", $trace[0]["line"], $msg);
         } else {
-            print $msg . "<br>\n";
+            printf("Line %04d: %s<br>\n", $trace[0]["line"], $msg);
         }
     }
 }
