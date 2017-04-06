@@ -311,18 +311,17 @@ class ZoomifyFileProcessor
 
                 $this->debugMessage("imageRow imagecopyresized tierWidth=$tierWidth imageRowHalfHeight= $imageRowHalfHeight firstRowWidth=$firstRowWidth firstRowHeight=$firstRowHeight");
 
-                imagecopyresampled($imageRow, $secondRowImage, 0, $imageRowHalfHeight, 0, 0, $tierWidth, $imageRowHalfHeight, $secondRowWidth, $secondRowHeight);
+                imagecopyresampled($imageRow, $secondRowImage, 0, $imageRowHalfHeight, 0, 0, $tierWidth, $secondRowHeight, $secondRowWidth, $secondRowHeight);
 
                 unlink($secondRowFile);
             }
 
             # the last row may be less than $this->tileSize...
             $rowHeight = $firstRowHeight+$secondRowHeight;
-            $tileHeight = $this->tileSize*2;
-            if (($firstRowHeight + $secondRowHeight) < $this->tileSize*2) {
+            $tileHeight = $this->tileSize;
+            if ($rowHeight < $tileHeight) {
                 $this->debugMessage("line 241 calling crop rowHeight=$rowHeight tileHeight=$tileHeight");
-
-                $imageRow = $this->imageCrop($imageRow, 0, 0, $tierWidth, $firstRowHeight+$secondRowHeight);
+                $imageRow = $this->imageCrop($imageRow, 0, 0, $tierWidth, $rowHeight);
             }
         }
 
