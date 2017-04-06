@@ -1,7 +1,17 @@
 # zoomify-image-php
 
-Wes Wright has ported Adam Smith‘s ZoomifyImage processor from Python to PHP. This is a tool that lets you convert images to a format that can be viewed using the flash based Zoomify viewer.  
+This project based Justin D. Henry's project "ZoomifyImage ported to PHP".
+See original program's information [Justin Henry's green galoshes](http://greengaloshes.cc/2007/05/zoomifyimage-ported-to-php/).
 
-Wes gave me the go-ahead to write a bit about his work on this and put it up for download. Additionally, Justin Henry has modified the scripts Justin Henry had originally written that used the python tools so they work with Wes’s ZoomifyFileProcessor class.  
+## How to use
 
-See more information [Justin Henry's green galoshes](http://greengaloshes.cc/2007/05/zoomifyimage-ported-to-php/).
+$ git clone git@github.com:atyks/zoomify-image-php.git
+
+put source image file to ./image
+
+$ php example.php
+
+generate Zoomify file to ./image
+
+# additional information
+see [zoomify-image-phpを修正した](http://atyks.hateblo.jp/entry/2017/01/24/065631) (japanese)
