@@ -292,14 +292,14 @@ class ZoomifyFileProcessor
 
                 $this->debugMessage("imageRow imagecopyresized tierWidth=$tierWidth imageRowHalfHeight= $imageRowHalfHeight firstRowWidth=$firstRowWidth firstRowHeight=$firstRowHeight");
 
-                imagecopyresized($imageRow, $firstRowImage, 0, 0, 0, 0, $tierWidth, $imageRowHalfHeight, $firstRowWidth, $firstRowHeight);
+                imagecopyresized($imageRow, $firstRowImage, 0, 0, 0, 0, $tierWidth, $firstRowHeight, $firstRowWidth, $firstRowHeight);
                 unlink($firstRowFile);
             }
 
             $r=$r+1;
             $secondRowFile =  $root . $t . "-" . $r . $ext;
 
-            $this->debugMessage("create this row from previous tier's rows tier=$tier row=$row secondRowFile=$secondRowFile");
+            $this->debugMessage("create this row from previous tier's rows tier=$tier row=$row secondRowFile=$secondRowFile"); 
 
             # there may not be a second row at the bottom of the image...
             if (is_file($secondRowFile)) {
