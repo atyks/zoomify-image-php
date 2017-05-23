@@ -128,14 +128,26 @@ class ZoomifyFileProcessor
         return $ret;
     }
 
-    public function writeImage($image, $file, $quality=100)
+    public function writeImage($image, $file, $quality=100, $format="jpg")
     {
-        $ret = "";
+        $ret = false;
 
         # """ load the image data """
         $this->debugMessage("writeImage ". $file);
 
-        return imagejpeg($image, $file, $quality);
+        switch($format) {
+            case "png":
+                $ret = imagepng($image, $file, 0);
+                break;
+
+            case "jpg":
+            default;
+                $ret = imagejpeg($image, $file, $quality);
+                break;
+        }
+
+
+        return $ret;
     }
 
     public function isSupportImageType($file)
@@ -263,7 +275,7 @@ class ZoomifyFileProcessor
             $this->debugMessage("firstTierRowFile=$firstTierRowFile");
 
             if (is_file($firstTierRowFile)) {
-                $imageRow = imagecreatefromjpeg($firstTierRowFile);
+                $imageRow = $this->openImage($firstTierRowFile);
 
                 $this->debugMessage("firstTierRowFile exists");
             }
@@ -285,7 +297,7 @@ class ZoomifyFileProcessor
             $secondRowHeight = 0;
             if (is_file($firstRowFile)) {
                 #        print firstRowFile + ' exists, try to open...'
-                $firstRowImage = imagecreatefromjpeg($firstRowFile);
+                $firstRowImage = $this->openImage($firstRowFile);
                 $firstRowWidth = imagesx($firstRowImage);
                 $firstRowHeight = imagesy($firstRowImage);
                 $imageRowHalfHeight = floor($this->tileSize/2);
@@ -299,13 +311,13 @@ class ZoomifyFileProcessor
             $r=$r+1;
             $secondRowFile =  $root . $t . "-" . $r . $ext;
 
-            $this->debugMessage("create this row from previous tier's rows tier=$tier row=$row secondRowFile=$secondRowFile"); 
+            $this->debugMessage("create this row from previous tier's rows tier=$tier row=$row secondRowFile=$secondRowFile");
 
             # there may not be a second row at the bottom of the image...
             if (is_file($secondRowFile)) {
                 $this->debugMessage($secondRowFile . " exists, try to open...");
 
-                $secondRowImage = imagecreatefromjpeg($secondRowFile);
+                $secondRowImage = $this->openImage($secondRowFile);
                 $secondRowWidth = imagesx($secondRowImage);
                 $secondRowHeight = imagesy($secondRowImage);
 
@@ -444,7 +456,7 @@ class ZoomifyFileProcessor
 
             $this->touch("file", $saveFilename);
 
-            $this->writeImage($imageRow, $saveFilename, 100);
+            $this->writeImage($imageRow, $saveFilename, 100, "png");
             imagedestroy($imageRow);
             $this->processRowImage($tier, $row);
             $row++;
